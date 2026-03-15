@@ -53,7 +53,7 @@ class MainMenuOverlay extends StatelessWidget {
             const SizedBox(height: 20),
             _MenuButton(
               label: 'CREDITS',
-              onPressed: () => _showCredits(context),
+              onPressed: () => game.showCredits(),
             ),
           ],
         ),
@@ -61,76 +61,6 @@ class MainMenuOverlay extends StatelessWidget {
     );
   }
 
-  void _showCredits(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: const Color(0xFF1a1a2e),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'CREDITS',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 4,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                _creditEntry('Bianca Pedroso', 'Art & Design'),
-                const SizedBox(height: 16),
-                _creditEntry('Caio Pedroso', 'Programming, Story & Music'),
-                const SizedBox(height: 32),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'CLOSE',
-                    style: TextStyle(
-                      color: Color(0xFFe94560),
-                      fontSize: 16,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _creditEntry(String name, String role) {
-    return Column(
-      children: [
-        Text(
-          name,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          role,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white.withValues(alpha: 0.6),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _MenuButton extends StatelessWidget {

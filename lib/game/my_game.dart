@@ -29,11 +29,7 @@ final _dialogueBox = BoxDecoration(
 
 class _WoofBubble extends PositionComponent {
   _WoofBubble({required super.position})
-    : super(
-        size: Vector2(140, 60),
-        anchor: Anchor.bottomCenter,
-        priority: 20,
-      );
+    : super(size: Vector2(140, 60), anchor: Anchor.bottomCenter, priority: 20);
 
   final TextPaint _text = TextPaint(
     style: GoogleFonts.sniglet(
@@ -87,6 +83,7 @@ class MyGame extends FlameGame {
     this.bootToCodeDebug = false,
     this.bootToFrontHouseDebug = false,
     this.bootToQuintalDebug = false,
+    this.bootToFinaleDebug = false,
   });
 
   final bool bootToSoccerDebug;
@@ -95,6 +92,7 @@ class MyGame extends FlameGame {
   final bool bootToCodeDebug;
   final bool bootToFrontHouseDebug;
   final bool bootToQuintalDebug;
+  final bool bootToFinaleDebug;
 
   List<StoryLine> currentDialogue = const [];
   BuildContext? _dialogueContext;
@@ -144,6 +142,7 @@ class MyGame extends FlameGame {
       'chars/bro1_smileface.png',
       'chars/bro1_wowface.png',
       'chars/bro1_noface.png',
+      'chars/bro1chorando.png',
       'chars/chubby.png',
       'chars/chubby2.png',
       'chars/chubbyangry.png',
@@ -180,11 +179,14 @@ class MyGame extends FlameGame {
       'props/tv.png',
       'props/celular.png',
       'props/wifi.png',
+      'ui/credits.png',
     ]);
 
     await MinigameSfx.preload();
 
-    if (bootToQuintalDebug) {
+    if (bootToFinaleDebug) {
+      _loadSalaFinaleScene();
+    } else if (bootToQuintalDebug) {
       _loadQuintalScene();
     } else if (bootToFrontHouseDebug) {
       _loadFrontHouseScene();
@@ -197,13 +199,24 @@ class MyGame extends FlameGame {
     } else if (bootToSoccerDebug) {
       _loadSoccerDebugScene();
     } else {
-      _loadSalaScene();
+      overlays.add('menu');
     }
   }
 
   void startGame() {
     overlays.remove('menu');
     _loadSalaScene();
+  }
+
+  void showCredits() {
+    overlays.remove('menu');
+    _loadCreditsScene();
+  }
+
+  void returnToMainMenu() {
+    overlays.remove('credits');
+    _clearWorld();
+    overlays.add('menu');
   }
 
   void _loadSoccerDebugScene() {
@@ -1192,7 +1205,11 @@ class MyGame extends FlameGame {
 
     // Zoom camera into the dog.
     final viewfinder = camera.viewfinder;
-    final dogCenter = Vector2(dog.position.x, dog.position.y - dog.size.y / 2);
+    // Offset camera target above the dog so he appears in the lower portion of the frame.
+    final dogCenter = Vector2(
+      dog.position.x,
+      dog.position.y - dog.size.y * 1.0,
+    );
     viewfinder.add(
       ScaleEffect.to(
         Vector2.all(1.8),
@@ -1281,16 +1298,15 @@ class MyGame extends FlameGame {
           text: 'Hey Bob, sorry to bother you on a Sunday.',
           isFromMe: true,
         ),
+        _TextMessage(text: 'Can you do me a quick favor?', isFromMe: true),
         _TextMessage(
-          text: 'Can you do me a quick favor?',
+          text:
+              "My lil bro is trying to watch Brodaflix but it isn't working...",
           isFromMe: true,
         ),
         _TextMessage(
-          text: "My lil bro is trying to watch Brodaflix but it isn't working...",
-          isFromMe: true,
-        ),
-        _TextMessage(
-          text: 'Is there any issue going on or something wrong with my family account?',
+          text:
+              'Is there any issue going on or something wrong with my family account?',
           isFromMe: true,
         ),
         _TextMessage(
@@ -1298,45 +1314,30 @@ class MyGame extends FlameGame {
           isFromMe: false,
         ),
         _TextMessage(
-          text: 'Yeah, it says here your account is suspended for 24h.',
+          text: 'Well, there seems to be no issues at all...',
           isFromMe: false,
         ),
         _TextMessage(
-          text: "Well, we usually don't do this, but I will remove the ban for you.",
-          isFromMe: false,
-        ),
-        _TextMessage(text: 'Okay, done.', isFromMe: false),
-        _TextMessage(text: 'Thanks man!', isFromMe: true),
-        _TextMessage(
-          text: 'Mind if I ask, why was it suspended?',
-          isFromMe: true,
-        ),
-        _TextMessage(
-          text: 'Someone using a LiBroNux OS sent 69420 unauthorized requests to our servers yesterday.',
+          text: 'Both your account and our services are normal.',
           isFromMe: false,
         ),
         _TextMessage(
-          text: 'And even a few thousand more a couple minutes ago...',
+          text: 'Is there anything else I can do for you?',
           isFromMe: false,
         ),
+        _TextMessage(text: 'Got it, appreciate it man.', isFromMe: true),
         _TextMessage(
-          text: 'Can you tell your brothers to avoid doing that?',
-          isFromMe: false,
-        ),
-        _TextMessage(
-          text: 'You guys might get in trouble...',
-          isFromMe: false,
-        ),
-        _TextMessage(text: 'Oh.', isFromMe: true),
-        _TextMessage(
-          text: 'Sure, I will discipline my brothers properly.',
+          text: 'I will talk to my brothers and figure out what happened.',
           isFromMe: true,
         ),
         _TextMessage(
           text: 'Thank you so much and sorry for the trouble.',
           isFromMe: true,
         ),
-        _TextMessage(text: 'Enjoy your Sunday!', isFromMe: true),
+        _TextMessage(
+          text: "Don't mention it, enjoy your Sunday!",
+          isFromMe: false,
+        ),
       ],
       maxVisibleMessages: 6,
     );
@@ -1386,11 +1387,12 @@ class MyGame extends FlameGame {
 
     _blue!.add(
       MoveByEffect(
-        Vector2(-1400, 0),
-        EffectController(duration: 2.0, curve: Curves.easeIn),
-      )..onComplete = () {
-        _blue!.stopWalking();
-      },
+          Vector2(-1400, 0),
+          EffectController(duration: 2.0, curve: Curves.easeIn),
+        )
+        ..onComplete = () {
+          _blue!.stopWalking();
+        },
     );
 
     // Strong and dog chase after a short delay.
@@ -1399,21 +1401,23 @@ class MyGame extends FlameGame {
       _strong?.startWalking();
       _strong?.add(
         MoveByEffect(
-          Vector2(-1600, 0),
-          EffectController(duration: 2.0, curve: Curves.easeIn),
-        )..onComplete = () {
-          _strong?.stopWalking();
-        },
+            Vector2(-1600, 0),
+            EffectController(duration: 2.0, curve: Curves.easeIn),
+          )
+          ..onComplete = () {
+            _strong?.stopWalking();
+          },
       );
 
       _dogSceneProp?.flipHorizontallyAroundCenter();
       _dogSceneProp?.add(
         MoveByEffect(
-          Vector2(-1600, 0),
-          EffectController(duration: 2.0, curve: Curves.easeIn),
-        )..onComplete = () {
-          _fadeToScene(_loadSalaFinaleScene);
-        },
+            Vector2(-1600, 0),
+            EffectController(duration: 2.0, curve: Curves.easeIn),
+          )
+          ..onComplete = () {
+            _fadeToScene(_loadSalaFinaleScene);
+          },
       );
     });
   }
@@ -1429,7 +1433,7 @@ class MyGame extends FlameGame {
 
     _bro1 = Character(
       imagePath: 'chars/bro1_smileface.png',
-      position: Vector2(-800, 280),
+      position: Vector2(-30, 280),
       characterHeight: 420,
     );
 
@@ -1473,7 +1477,19 @@ class MyGame extends FlameGame {
     _dogSceneProp!.position = Vector2(-800, 420);
     _dogFacingLeft = false;
 
-    final allChars = [_bro1!, _chubby!, _blonde!, _big!, _suit!, _blue!, _strong!];
+    _blonde!.flipHorizontally();
+    _big!.flipHorizontally();
+    _blue!.flipHorizontally();
+
+    final allChars = [
+      _bro1!,
+      _chubby!,
+      _blonde!,
+      _big!,
+      _suit!,
+      _blue!,
+      _strong!,
+    ];
     world.addAll([...allChars, _dogSceneProp!]);
 
     // Entry order, side, and target X positions (center outward).
@@ -1487,13 +1503,12 @@ class MyGame extends FlameGame {
     //  dog     → with strong, lands at -560
 
     final entries = <({Character char, bool fromLeft, double targetX})>[
-      (char: _bro1!,   fromLeft: true,  targetX: -60),
       (char: _chubby!, fromLeft: false, targetX: 100),
-      (char: _blonde!, fromLeft: true,  targetX: -150),
-      (char: _big!,    fromLeft: false, targetX: 320),
-      (char: _suit!,   fromLeft: true,  targetX: -300),
-      (char: _blue!,   fromLeft: false, targetX: 480),
-      (char: _strong!, fromLeft: true,  targetX: -470),
+      (char: _blonde!, fromLeft: true, targetX: -195),
+      (char: _big!, fromLeft: false, targetX: 320),
+      (char: _suit!, fromLeft: true, targetX: -280),
+      (char: _blue!, fromLeft: false, targetX: 510),
+      (char: _strong!, fromLeft: true, targetX: -470),
     ];
 
     for (var i = 0; i < entries.length; i++) {
@@ -1504,11 +1519,12 @@ class MyGame extends FlameGame {
       Future.delayed(Duration(milliseconds: delay), () {
         e.char.add(
           MoveEffect.to(
-            Vector2(e.targetX, e.char.position.y),
-            EffectController(duration: 1.4, curve: Curves.easeOutCubic),
-          )..onComplete = () {
-            e.char.stopWalking();
-          },
+              Vector2(e.targetX, e.char.position.y),
+              EffectController(duration: 1.4, curve: Curves.easeOutCubic),
+            )
+            ..onComplete = () {
+              e.char.stopWalking();
+            },
         );
 
         // Dog enters together with Strong (last character).
@@ -1523,10 +1539,123 @@ class MyGame extends FlameGame {
       });
     }
 
-    // Start finale dialogue after everyone is in place.
+    // After everyone is in place, play bro1 look-around then start dialogue.
     final totalDelay = 400 + (entries.length * 450) + 1600;
-    Future.delayed(Duration(milliseconds: totalDelay), () {
-      _showSceneDialogue(StorySceneId.salaFinale);
+    Future.delayed(Duration(milliseconds: totalDelay), _playBro1LookAround);
+  }
+
+  void _playBro1LookAround() {
+    final bro1 = _bro1;
+    if (bro1 == null) {
+      _startFinaleDialogue();
+      return;
+    }
+
+    // Flip right, left, right, left with brief pauses, then surprised face.
+    const flipDelay = 300;
+    bro1.flipHorizontally(); // face right
+    Future.delayed(const Duration(milliseconds: flipDelay), () {
+      bro1.flipHorizontally(); // face left
+      Future.delayed(const Duration(milliseconds: flipDelay), () {
+        bro1.flipHorizontally(); // face right
+        Future.delayed(const Duration(milliseconds: flipDelay), () {
+          bro1.flipHorizontally(); // face left (original)
+          Future.delayed(const Duration(milliseconds: 200), () {
+            bro1.setImagePath('chars/bro1_wowface.png');
+            Future.delayed(const Duration(milliseconds: 600), () {
+              bro1.setImagePath('chars/bro1_smileface.png');
+              _startFinaleDialogue();
+            });
+          });
+        });
+      });
+    });
+  }
+
+  void _startFinaleDialogue() {
+    _dogFlipEnabled = false;
+    _showSceneDialogue(
+      StorySceneId.salaFinale,
+      padding: const EdgeInsets.fromLTRB(64, 75, 64, 24),
+      onFinish: _playFinaleLaugh,
+    );
+  }
+
+  void _playFinaleLaugh() {
+    // Everyone bounces up and down asynchronously, like chuckling.
+    final characters = <PositionComponent?>[
+      _bro1,
+      _chubby,
+      _blonde,
+      _big,
+      _suit,
+      _blue,
+      _strong,
+      _dogSceneProp,
+    ];
+
+    for (var i = 0; i < characters.length; i++) {
+      final char = characters[i];
+      if (char == null) continue;
+
+      // Stagger start times so they bounce async.
+      final staggerDelay = i * 120;
+      Future.delayed(Duration(milliseconds: staggerDelay), () {
+        char.add(
+          MoveByEffect(
+            Vector2(0, -20),
+            EffectController(
+              duration: 0.25,
+              alternate: true,
+              repeatCount: 6,
+              curve: Curves.easeInOut,
+              startDelay: 0,
+            ),
+          ),
+        );
+      });
+    }
+
+    // Show the HAHAHA text after a brief moment (no portrait, just text box).
+    Future.delayed(const Duration(milliseconds: 300), () {
+      final ctx = _dialogueContext;
+      if (ctx == null) return;
+
+      TalkDialog.show(
+        ctx,
+        [
+          Say(
+            text: [const TextSpan(text: 'HAHAHAHAHAHAHA')],
+            person: const SizedBox.shrink(),
+            personSize: Size.zero,
+            personSayDirection: PersonSayDirection.LEFT,
+            boxDecoration: _dialogueBox,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 14.7),
+          ),
+        ],
+        onFinish: () => _fadeToScene(_loadCreditsScene),
+        backgroundColor: Colors.transparent,
+        boxTextHeight: 147,
+        padding: const EdgeInsets.fromLTRB(64, 75, 64, 24),
+        talkAlignment: Alignment.topCenter,
+        style: GoogleFonts.sniglet(
+          color: Colors.black87,
+          fontSize: 38,
+          height: 1.4,
+        ),
+        speed: 30,
+      );
+    });
+  }
+
+  void _loadCreditsScene() {
+    final bg = SceneBackground(imagePath: 'ui/credits.png');
+    world.add(bg);
+
+    // Show credits overlay after fade-in completes.
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      overlays.add('credits');
     });
   }
 
@@ -1953,8 +2082,10 @@ class MyGame extends FlameGame {
   /// Blue is on the left, so the dog flips horizontally to face left.
   /// Strong is on the right (original orientation), so no flip.
   bool _dogFacingLeft = false;
+  bool _dogFlipEnabled = true;
 
   void _flipDogTowardSpeaker(StoryLine line) {
+    if (!_dogFlipEnabled) return;
     final dog = _dogSceneProp;
     if (dog == null) return;
 
@@ -1975,15 +2106,16 @@ class MyGame extends FlameGame {
     // Jump up and back down.
     dog.add(
       MoveByEffect(
-        Vector2(0, -30),
-        EffectController(
-          duration: 0.15,
-          alternate: true,
-          curve: Curves.easeOut,
-        ),
-      )..onComplete = () {
-        dog.sprite = defaultSprite;
-      },
+          Vector2(0, -30),
+          EffectController(
+            duration: 0.15,
+            alternate: true,
+            curve: Curves.easeOut,
+          ),
+        )
+        ..onComplete = () {
+          dog.sprite = defaultSprite;
+        },
     );
 
     // WOOF bubble above the dog.
@@ -2204,11 +2336,11 @@ class _PhoneTextComponent extends PositionComponent with HasPaint {
     required this.messages,
     this.maxVisibleMessages = 0,
   }) : super(
-        position: Vector2.zero(),
-        size: Vector2(640, 620),
-        anchor: Anchor.center,
-        priority: 10,
-      );
+         position: Vector2.zero(),
+         size: Vector2(640, 620),
+         anchor: Anchor.center,
+         priority: 10,
+       );
 
   final Sprite phoneSprite;
   final List<_TextMessage> messages;

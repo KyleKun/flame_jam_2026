@@ -29,6 +29,7 @@ enum StorySceneId {
   frontHousePostPhone,
   frontHouseChase,
   salaFinale,
+  salaFinaleLaugh,
 }
 
 enum StoryActorId { bro1, chubby, blonde, big, suit, blue, strong }
@@ -98,7 +99,7 @@ class GameStory {
           expression: 'chars/bro1_wowface.png',
         ),
         _bro1Line(
-          'Nothing beats Brodaflix and chill with the bros.',
+          'Nothing beats Brodaflix and chill.',
           expression: 'chars/bro1_smileface.png',
         ),
         _bro1Line(
@@ -121,7 +122,7 @@ class GameStory {
         ),
         _bro1Line(
           'No no no, this can\'t be happening, not on a sacred Sunday morning!',
-          expression: 'chars/bro1_noface.png',
+          expression: 'chars/bro1chorando.png',
         ),
         _bro1Line(
           'I need to ask Big Bro, he surely can fix this.',
@@ -143,7 +144,7 @@ class GameStory {
         StoryLine(
           speaker: StoryActorId.bro1,
           side: StoryDialogueSide.left,
-          actorImagePath: 'chars/bro1_noface.png',
+          actorImagePath: 'chars/bro1chorando.png',
           flipHorizontally: true,
           text: 'THE TV IS NOT WORKING AND MY FAVORITE SHOW IS ABOUT TO START!',
         ),
@@ -173,14 +174,7 @@ class GameStory {
           side: StoryDialogueSide.right,
           actorImagePath: 'chars/chubbyangry.png',
           flipHorizontally: false,
-          text: '...',
-        ),
-        StoryLine(
-          speaker: StoryActorId.chubby,
-          side: StoryDialogueSide.right,
-          actorImagePath: 'chars/chubbyangry.png',
-          flipHorizontally: false,
-          text: 'Listen, I told you I am on a diet.',
+          text: 'Listen... I told you I am on a diet.',
         ),
         StoryLine(
           speaker: StoryActorId.chubby,
@@ -936,7 +930,7 @@ class GameStory {
           side: StoryDialogueSide.right,
           actorImagePath: 'chars/strong2.png',
           portraitAssetPath: 'assets/images/chars/strong2.png',
-          text: 'Both body and mind training are for everyone, after all!',
+          text: 'After all, body and mind training are for everyone!',
         ),
         StoryLine(
           speaker: StoryActorId.blue,
@@ -1027,7 +1021,35 @@ class GameStory {
           side: StoryDialogueSide.right,
           actorImagePath: 'chars/strongangry.png',
           portraitAssetPath: 'assets/images/chars/strongangry.png',
-          text: 'You better run, Lil Bro...',
+          text:
+              "There's nothing wrong lil bro, so I can assume you just said that to provoke me, huh?",
+        ),
+        StoryLine(
+          speaker: StoryActorId.blue,
+          side: StoryDialogueSide.left,
+          portraitOffsetY: -16,
+          text: "No, I'd never do that, I promise you!",
+        ),
+        StoryLine(
+          speaker: StoryActorId.strong,
+          side: StoryDialogueSide.right,
+          actorImagePath: 'chars/strongangry.png',
+          portraitAssetPath: 'assets/images/chars/strongangry.png',
+          text:
+              "Either way, you got on my nerves and I am kinda mad now, so...",
+        ),
+        StoryLine(
+          speaker: StoryActorId.blue,
+          side: StoryDialogueSide.left,
+          portraitOffsetY: -16,
+          text: 'I better run?',
+        ),
+        StoryLine(
+          speaker: StoryActorId.strong,
+          side: StoryDialogueSide.right,
+          actorImagePath: 'chars/strongangry.png',
+          portraitAssetPath: 'assets/images/chars/strongangry.png',
+          text: 'Yeah, you better run!',
         ),
       ],
     ),
@@ -1039,9 +1061,210 @@ class GameStory {
           speaker: StoryActorId.bro1,
           side: StoryDialogueSide.left,
           actorImagePath: 'chars/bro1_smileface.png',
-          text: "Let's all watch together!",
+          text: 'You guys are all here!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.chubby,
+          side: StoryDialogueSide.right,
+          flipHorizontally: false,
+          text: 'Of course!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blonde,
+          side: StoryDialogueSide.left,
+          text: "Let's end this quickly, I wanna play soccer!",
+        ),
+        StoryLine(
+          speaker: StoryActorId.big,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -22,
+          text: 'What are we doing here, again?',
+        ),
+        StoryLine(
+          speaker: StoryActorId.suit,
+          side: StoryDialogueSide.left,
+          text: 'I am happy you are not crying anymore...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blue,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -16,
+          text: 'Big Bro almost killed me, but I am still alive somehow.',
+        ),
+        StoryLine(
+          speaker: StoryActorId.strong,
+          side: StoryDialogueSide.left,
+          text: "Let's just buy another TV!",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_noface.png',
+          text: 'Wait, brothers, I need to tell you something...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_noface.png',
+          text:
+              "The TV wasn't working until I got the message from our soccer addict bro.",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_noface.png',
+          text:
+              'Turns out, a few seconds after the Wi-Fi was reset, it went back to normal...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.big,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -22,
+          text: 'I knew it!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blue,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -16,
+          text: "Goddamn, I should've just checked the TV itself.",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_wowface.png',
+          text: 'BUT!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_noface.png',
+          text: 'I originally asked Diet Bro for help.',
+        ),
+        StoryLine(
+          speaker: StoryActorId.chubby,
+          side: StoryDialogueSide.right,
+          actorImagePath: 'chars/chubbyangry.png',
+          flipHorizontally: false,
+          text: 'Diet Bro, huh?',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_noface.png',
+          alsoChangeActor: StoryActorId.chubby,
+          alsoChangeActorImagePath: 'chars/chubby.png',
+          text:
+              'But then after I got the message, I noticed you guys were all working together to help me out.',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text:
+              "And it's so rare these days for everyone to interact with each other...",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text:
+              "Everyone has their own stuff going on, and life just flies, you know?",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text: "We are all so different, but we are still brothers...",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text:
+              "Then I decided not to tell anyone that it was already fixed...",
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text:
+              'That way, you guys could keep talking to each other some more.',
+        ),
+        StoryLine(
+          speaker: StoryActorId.strong,
+          side: StoryDialogueSide.right,
+          text: '...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.suit,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/suit2.png',
+          text: 'Oh God...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blonde,
+          side: StoryDialogueSide.left,
+          text: 'Not gonna lie, Lil Bro, you got me a bit emotional here...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1chorando.png',
+          text: 'So now that we are all here...',
+        ),
+        StoryLine(
+          speaker: StoryActorId.bro1,
+          side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bro1_smileface.png',
+          alsoChangeActor: StoryActorId.suit,
+          alsoChangeActorImagePath: 'chars/suit.png',
+          text: 'How about we watch the show together?',
+        ),
+        StoryLine(
+          speaker: StoryActorId.big,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -22,
+          text: 'Brodaflix and chill?',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blonde,
+          side: StoryDialogueSide.left,
+          text: "I'm in!",
+        ),
+        StoryLine(
+          speaker: StoryActorId.chubby,
+          side: StoryDialogueSide.right,
+          flipHorizontally: false,
+          text: 'Yay, let me grab lunch!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.suit,
+          side: StoryDialogueSide.left,
+          text: 'Count me in!',
+        ),
+        StoryLine(
+          speaker: StoryActorId.blue,
+          side: StoryDialogueSide.right,
+          flipHorizontally: true,
+          portraitOffsetY: -16,
+          text: "It's been a long time since I watched TV, let's gooo!",
+        ),
+        StoryLine(
+          speaker: StoryActorId.strong,
+          side: StoryDialogueSide.right,
+          text: 'Alright, but we might need another sofa...',
         ),
       ],
+    ),
+    StorySceneScript(
+      id: StorySceneId.salaFinaleLaugh,
+      label: 'Sala Finale Laugh',
+      lines: [_bro1Line('HAHAHAHAHAHAHA')],
     ),
   ];
 

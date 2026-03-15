@@ -8,10 +8,14 @@ import 'package:flame_jam_2026/game/overlays/main_menu.dart';
 import 'package:flame_jam_2026/game/overlays/minigame_game_over_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/minigame_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/musicroom_overlay.dart';
+import 'package:flame_jam_2026/game/overlays/credits_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/soccer_overlay.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.pendingFonts([GoogleFonts.sniglet()]);
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -29,9 +33,9 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final game = MyGame();
+  //final game = MyGame();
   // final game = MyGame(bootToCodeDebug: true);
-  // final game = MyGame(bootToFrontHouseDebug: true);
+  final game = MyGame();
   // final game = MyGame(bootToBathroomDebug: true);
   // final game = MyGame(bootToSoccerDebug: true);
   // final game = MyGame(bootToQuintalDebug: true);
@@ -60,6 +64,7 @@ class _GameScreenState extends State<GameScreen> {
           'coding': (context, game) => CodeOverlay(game: game),
           'dogTraining': (context, game) => DogTrainingOverlay(game: game),
           'debugSkip': (context, game) => DebugSkipOverlay(game: game),
+          'credits': (context, game) => CreditsOverlay(game: game),
         },
         initialActiveOverlays: const [],
       ),
