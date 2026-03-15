@@ -95,6 +95,8 @@ class MyGame extends FlameGame {
   final bool bootToQuintalDebug;
   final bool bootToFinaleDebug;
 
+  VoidCallback? onLoadComplete;
+
   List<StoryLine> currentDialogue = const [];
   BuildContext? _dialogueContext;
 
@@ -187,6 +189,8 @@ class MyGame extends FlameGame {
 
     await MinigameSfx.preload();
     await GameBgm.preload();
+
+    onLoadComplete?.call();
 
     if (bootToFinaleDebug) {
       _loadSalaFinaleScene();

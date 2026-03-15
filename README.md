@@ -1,17 +1,20 @@
-# flame_jam_2026
+# Flame Jam 2026
 
-A new Flutter project.
+A short game made for the Flame Game Jam 2026.
 
-## Getting Started
+## About
 
-This project is a starting point for a Flutter application.
+In a house full of brothers, a disaster happened: the TV stopped working!
 
-A few resources to get you started if this is your first Flutter project:
+Can the big bros work together to fix it?
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Running
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run -d chrome
+```
+
+## Built With
+
+- Flutter & Flame
+- flame_audio

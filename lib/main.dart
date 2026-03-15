@@ -4,6 +4,7 @@ import 'package:flame_jam_2026/game/overlays/bathroom_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/code_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/debug_skip_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/dog_training_overlay.dart';
+import 'package:flame_jam_2026/game/overlays/loading_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/main_menu.dart';
 import 'package:flame_jam_2026/game/overlays/minigame_game_over_overlay.dart';
 import 'package:flame_jam_2026/game/overlays/minigame_overlay.dart';
@@ -49,6 +50,16 @@ class _GameScreenState extends State<GameScreen> {
   // final game = MyGame(bootToCodeDebug: true);
   // final game = MyGame(bootToMusicDebug: true);
 
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    game.onLoadComplete = () {
+      if (mounted) setState(() => _loading = false);
+    };
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -59,23 +70,30 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GameWidget<MyGame>(
-        game: game,
-        overlayBuilderMap: {
-          'menu': (context, game) => MainMenuOverlay(game: game),
-          'minigame': (context, game) => MinigameOverlay(game: game),
-          'minigameGameOver': (context, game) =>
-              MinigameGameOverOverlay(game: game),
-          'soccer': (context, game) => SoccerOverlay(game: game),
-          'bathroom': (context, game) => BathroomOverlay(game: game),
-          'musicroom': (context, game) => MusicRoomOverlay(game: game),
-          'coding': (context, game) => CodeOverlay(game: game),
-          'dogTraining': (context, game) => DogTrainingOverlay(game: game),
-          'debugSkip': (context, game) => DebugSkipOverlay(game: game),
-          'credits': (context, game) => CreditsOverlay(game: game),
-          'selectPlayer': (context, game) => SelectPlayerOverlay(game: game),
-        },
-        initialActiveOverlays: const [],
+      body: Stack(
+        children: [
+          GameWidget<MyGame>(
+            game: game,
+            overlayBuilderMap: {
+              'menu': (context, game) => MainMenuOverlay(game: game),
+              'minigame': (context, game) => MinigameOverlay(game: game),
+              'minigameGameOver': (context, game) =>
+                  MinigameGameOverOverlay(game: game),
+              'soccer': (context, game) => SoccerOverlay(game: game),
+              'bathroom': (context, game) => BathroomOverlay(game: game),
+              'musicroom': (context, game) => MusicRoomOverlay(game: game),
+              'coding': (context, game) => CodeOverlay(game: game),
+              'dogTraining': (context, game) =>
+                  DogTrainingOverlay(game: game),
+              'debugSkip': (context, game) => DebugSkipOverlay(game: game),
+              'credits': (context, game) => CreditsOverlay(game: game),
+              'selectPlayer': (context, game) =>
+                  SelectPlayerOverlay(game: game),
+            },
+            initialActiveOverlays: const [],
+          ),
+          if (_loading) const LoadingOverlay(),
+        ],
       ),
     );
   }
