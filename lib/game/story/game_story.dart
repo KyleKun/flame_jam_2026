@@ -1027,6 +1027,8 @@ class GameStory {
         StoryLine(
           speaker: StoryActorId.blue,
           side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bluesurprise.png',
+          portraitAssetPath: 'assets/images/chars/bluesurprise.png',
           portraitOffsetY: -16,
           text: "No, I'd never do that, I promise you!",
         ),
@@ -1041,6 +1043,8 @@ class GameStory {
         StoryLine(
           speaker: StoryActorId.blue,
           side: StoryDialogueSide.left,
+          actorImagePath: 'chars/bluethink.png',
+          portraitAssetPath: 'assets/images/chars/bluethink.png',
           portraitOffsetY: -16,
           text: 'I better run?',
         ),

@@ -11,8 +11,12 @@ class MinigameGameOverOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black54,
-      child: Center(
-        child: Container(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Container(
           width: 520,
           padding: const EdgeInsets.symmetric(horizontal: 44, vertical: 38),
           decoration: BoxDecoration(
@@ -84,6 +88,8 @@ class MinigameGameOverOverlay extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
           ),
         ),
       ),

@@ -7,92 +7,106 @@ class CodeOverlay extends StatelessWidget {
 
   final MyGame game;
 
+  static const _color1 = Color(0xFF1D8E4C);
+  static const _color2 = Color(0xFF3CCB76);
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(alpha: 0.48),
-      child: SafeArea(
-        child: Center(
-          child: Container(
-            width: 640,
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.fromLTRB(28, 26, 28, 28),
-            decoration: BoxDecoration(
-              color: const Color(0xFF07140D).withValues(alpha: 0.96),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF3CCB76), width: 1.6),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.32),
-                  blurRadius: 26,
-                  offset: const Offset(0, 10),
+    return LayoutBuilder(builder: (context, cst) {
+      final wide = cst.maxWidth > 900;
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Align(
+          alignment: wide ? const Alignment(0, -0.6) : Alignment.center,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 44, vertical: 32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  width: 2,
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'BRODAFLIX REMOTE OPS',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFE8FFF0),
-                    letterSpacing: 1.8,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 32,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 10),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Rebuild each command from left to right.',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFA5E7BB),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [_color1, _color2],
+                    ).createShader(bounds),
+                    child: Text(
+                      'BRODAFLIX REMOTE OPS',
+                      style: GoogleFonts.sniglet(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 4,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Wrong blocks add errors. Tap the command line to rewind from any spot.',
-                  style: GoogleFonts.spaceMono(
-                    fontSize: 16,
-                    color: const Color(0xFF9BC7AC),
-                    height: 1.35,
+                  const SizedBox(height: 18),
+                  Text(
+                    'Rebuild each command from left to right.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.sniglet(
+                      fontSize: 24,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: 220,
-                    height: 54,
+                  const SizedBox(height: 14),
+                  Text(
+                    'Wrong blocks add errors.\nTap the command line to rewind from any spot.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.sniglet(
+                      fontSize: 21,
+                      color: _color1.withValues(alpha: 0.8),
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: 240,
+                    height: 62,
                     child: ElevatedButton(
                       onPressed: game.startCodeMinigame,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1D8E4C),
+                        backgroundColor: _color1,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
                         shadowColor: Colors.transparent,
                       ),
                       child: Text(
-                        'OPEN TERMINAL',
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
+                        'START',
+                        style: GoogleFonts.sniglet(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 4,
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

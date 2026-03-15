@@ -155,6 +155,8 @@ class MyGame extends FlameGame {
       'chars/suit2.png',
       'chars/blue.png',
       'chars/blue2.png',
+      'chars/bluesurprise.png',
+      'chars/bluethink.png',
       'chars/strong.png',
       'chars/strong2.png',
       'chars/strongangry.png',
@@ -205,7 +207,25 @@ class MyGame extends FlameGame {
 
   void startGame() {
     overlays.remove('menu');
+    overlays.add('selectPlayer');
+  }
+
+  void startGameFromSelect() {
+    // Add a black overlay that fades out, matching _fadeToScene style.
+    final fade = RectangleComponent(
+      size: Vector2(1280, 720),
+      anchor: Anchor.center,
+      paint: ui.Paint()..color = const Color(0xFF000000),
+      priority: 100,
+    );
+    fade.opacity = 1;
+    world.add(fade);
+
     _loadSalaScene();
+
+    final fadeOut = OpacityEffect.fadeOut(EffectController(duration: 0.8));
+    fadeOut.onComplete = () => fade.removeFromParent();
+    fade.add(fadeOut);
   }
 
   void showCredits() {
