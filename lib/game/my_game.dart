@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
+import 'package:flame_jam_2026/game/audio/game_bgm.dart';
 import 'package:flame_jam_2026/game/audio/minigame_sfx.dart';
 import 'package:flame_jam_2026/game/components/bathroom_hair_minigame.dart';
 import 'package:flame_jam_2026/game/components/character.dart';
@@ -185,6 +186,7 @@ class MyGame extends FlameGame {
     ]);
 
     await MinigameSfx.preload();
+    await GameBgm.preload();
 
     if (bootToFinaleDebug) {
       _loadSalaFinaleScene();
@@ -208,9 +210,12 @@ class MyGame extends FlameGame {
   void startGame() {
     overlays.remove('menu');
     overlays.add('selectPlayer');
+    GameBgm.play(GameBgm.selectplayer, volume: 0.3);
   }
 
   void startGameFromSelect() {
+    GameBgm.stop();
+
     // Add a black overlay that fades out, matching _fadeToScene style.
     final fade = RectangleComponent(
       size: Vector2(1280, 720),
@@ -234,6 +239,7 @@ class MyGame extends FlameGame {
   }
 
   void returnToMainMenu() {
+    GameBgm.stop();
     overlays.remove('credits');
     _clearWorld();
     overlays.add('menu');
@@ -256,6 +262,8 @@ class MyGame extends FlameGame {
     );
 
     world.addAll([bg, _bro1!]);
+
+    GameBgm.play(GameBgm.sala);
 
     Future.delayed(const Duration(milliseconds: 600), _startSalaDialogue);
   }
@@ -299,6 +307,7 @@ class MyGame extends FlameGame {
   }
 
   void _startSalaPostTvDialogue() {
+    GameBgm.play(GameBgm.suspense);
     _showSceneDialogue(StorySceneId.salaPostTv, onFinish: _walkBro1ToKitchen);
   }
 
@@ -386,6 +395,8 @@ class MyGame extends FlameGame {
 
     world.addAll([bg, _bro1!, _chubby!]);
 
+    GameBgm.play(GameBgm.kitchen, volume: 0.35);
+
     Future.delayed(const Duration(milliseconds: 600), _startKitchenDialogue);
   }
 
@@ -462,6 +473,7 @@ class MyGame extends FlameGame {
   }
 
   void retryKitchenMinigame() {
+    GameBgm.resume();
     overlays.remove('minigameGameOver');
     startKitchenMinigame();
   }
@@ -500,6 +512,8 @@ class MyGame extends FlameGame {
     );
 
     world.addAll([bg, _bro1!, _chubby!]);
+
+    GameBgm.play(GameBgm.sala);
 
     Future.delayed(
       const Duration(milliseconds: 600),
@@ -590,6 +604,8 @@ class MyGame extends FlameGame {
     _blonde!.flipHorizontally();
 
     world.addAll([bg, _chubby!, _blonde!]);
+
+    GameBgm.play(GameBgm.soccer, volume: 0.25);
 
     Future.delayed(const Duration(milliseconds: 600), _startQuintalDialogue);
   }
@@ -716,6 +732,8 @@ class MyGame extends FlameGame {
     );
 
     world.addAll([bg, _wifiProp!, _wifiLight!, _blonde!, _big!]);
+
+    GameBgm.play(GameBgm.bathroom, volume: 0.65);
 
     Future.delayed(const Duration(milliseconds: 600), _startBathroomDialogue);
   }
@@ -911,6 +929,8 @@ class MyGame extends FlameGame {
 
     world.addAll([bg, _big!, _suit!]);
 
+    GameBgm.play(GameBgm.musicroom);
+
     Future.delayed(const Duration(milliseconds: 600), _startMusicRoomDialogue);
   }
 
@@ -931,6 +951,7 @@ class MyGame extends FlameGame {
     }
 
     overlays.remove('musicroom');
+    GameBgm.pause();
     _musicMinigame = MusicRhythmMinigameComponent(
       onWin: _handleMusicMinigameWin,
     );
@@ -942,6 +963,8 @@ class MyGame extends FlameGame {
     overlays.remove('debugSkip');
     _musicMinigame?.removeFromParent();
     _musicMinigame = null;
+
+    GameBgm.resume();
 
     // Normalize suit sprite back to default
     _suit?.setImagePath('chars/suit.png');
@@ -1027,6 +1050,8 @@ class MyGame extends FlameGame {
     _blue!.flipHorizontally();
 
     world.addAll([bg, _suit!, _blue!]);
+
+    GameBgm.play(GameBgm.room, volume: 0.25);
 
     Future.delayed(const Duration(milliseconds: 600), _startCodeRoomDialogue);
   }
@@ -1195,6 +1220,8 @@ class MyGame extends FlameGame {
     _dogFacingLeft = false;
 
     world.addAll([bg, _blue!, _strong!, _dogSceneProp!]);
+
+    GameBgm.play(GameBgm.fronthouse, volume: 0.65);
 
     Future.delayed(const Duration(milliseconds: 600), _startFrontHouseDialogue);
   }
@@ -1443,6 +1470,8 @@ class MyGame extends FlameGame {
   }
 
   void _loadSalaFinaleScene() {
+    GameBgm.stop();
+
     final bg = SceneBackground(imagePath: 'bg/sala.png');
     world.add(bg);
 
@@ -1593,6 +1622,7 @@ class MyGame extends FlameGame {
   }
 
   void _startFinaleDialogue() {
+    GameBgm.play(GameBgm.bathroom, volume: 0.65);
     _dogFlipEnabled = false;
     _showSceneDialogue(
       StorySceneId.salaFinale,
@@ -1670,6 +1700,8 @@ class MyGame extends FlameGame {
   }
 
   void _loadCreditsScene() {
+    GameBgm.playOnce(GameBgm.credits, volume: 0.8, onComplete: returnToMainMenu);
+
     final bg = SceneBackground(imagePath: 'ui/credits.png');
     world.add(bg);
 
@@ -2122,6 +2154,7 @@ class MyGame extends FlameGame {
 
     // Swap to bark sprite.
     dog.sprite = barkSprite;
+    MinigameSfx.playWoof();
 
     // Jump up and back down.
     dog.add(

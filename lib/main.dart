@@ -16,7 +16,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GoogleFonts.pendingFonts([GoogleFonts.sniglet()]);
+  await GoogleFonts.pendingFonts([
+    GoogleFonts.sniglet(fontWeight: FontWeight.w400),
+    GoogleFonts.sniglet(fontWeight: FontWeight.w700),
+    GoogleFonts.sniglet(fontWeight: FontWeight.w800),
+    GoogleFonts.spaceMono(fontWeight: FontWeight.w400),
+    GoogleFonts.spaceMono(fontWeight: FontWeight.w700),
+  ]);
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -36,11 +42,12 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   //final game = MyGame();
   // final game = MyGame(bootToCodeDebug: true);
-  final game = MyGame();
+  // final game = MyGame();
   // final game = MyGame(bootToBathroomDebug: true);
   // final game = MyGame(bootToSoccerDebug: true);
   // final game = MyGame(bootToQuintalDebug: true);
   // final game = MyGame(bootToCodeDebug: true);
+  final game = MyGame(bootToMusicDebug: true);
 
   @override
   void didChangeDependencies() {
@@ -66,8 +73,7 @@ class _GameScreenState extends State<GameScreen> {
           'dogTraining': (context, game) => DogTrainingOverlay(game: game),
           'debugSkip': (context, game) => DebugSkipOverlay(game: game),
           'credits': (context, game) => CreditsOverlay(game: game),
-          'selectPlayer': (context, game) =>
-              SelectPlayerOverlay(game: game),
+          'selectPlayer': (context, game) => SelectPlayerOverlay(game: game),
         },
         initialActiveOverlays: const [],
       ),

@@ -17,7 +17,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
         priority: 80,
       );
 
-  static const int minimumCleanHits = 13;
+  static const int minimumCleanHits = 34;
   static const double _scrollSpeed = 212;
   static const double _hitWindow = 0.24;
   static const double _perfectWindow = 0.1;
@@ -26,20 +26,12 @@ class MusicRhythmMinigameComponent extends PositionComponent
   final VoidCallback onWin;
   final List<_RhythmNote> _notes = <_RhythmNote>[];
 
-  final TextPaint _titleText = TextPaint(
-    style: GoogleFonts.sniglet(
-      color: const Color(0xFF274A45),
-      fontSize: 30,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 2.2,
-    ),
-  );
-  final TextPaint _bodyText = TextPaint(
+  final TextPaint _hudText = TextPaint(
     style: GoogleFonts.sniglet(
       color: const Color(0xFF5D4C38),
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: FontWeight.w700,
-      height: 1.18,
+      letterSpacing: 1.0,
     ),
   );
   final TextPaint _scoreText = TextPaint(
@@ -50,33 +42,18 @@ class MusicRhythmMinigameComponent extends PositionComponent
       letterSpacing: 1.6,
     ),
   );
-  final TextPaint _feedbackText = TextPaint(
-    style: GoogleFonts.sniglet(
-      color: Colors.white,
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1.6,
-    ),
+  final TextStyle _feedbackStyle = GoogleFonts.sniglet(
+    color: Colors.white,
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.6,
   );
-  final TextPaint _resultTitleText = TextPaint(
-    style: GoogleFonts.sniglet(
-      color: const Color(0xFF274A45),
-      fontSize: 42,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 2.6,
-    ),
-  );
-
   double _songTime = 0;
   double _countIn = 1.15;
   double _pulseTime = 0;
   double _judgementTimer = 0;
   double _victoryDelay = 0;
   int _cleanHits = 0;
-  int _perfectHits = 0;
-  int _misses = 0;
-  int _combo = 0;
-  int _bestCombo = 0;
   bool _won = false;
   bool _roundEnded = false;
   bool _finishTriggered = false;
@@ -85,24 +62,21 @@ class MusicRhythmMinigameComponent extends PositionComponent
 
   Rect get _boardRect => const Rect.fromLTWH(78, 72, 1124, 578);
 
-  Rect get _infoCardRect => const Rect.fromLTWH(104, 100, 610, 108);
+  Rect get _hudRect => const Rect.fromLTWH(104, 92, 1072, 58);
 
-  Rect get _statsCardRect => const Rect.fromLTWH(736, 100, 440, 108);
+  Rect get _staffRect => const Rect.fromLTWH(104, 168, 1072, 380);
 
-  Rect get _staffRect => const Rect.fromLTWH(104, 230, 1072, 300);
+  Rect get _feedbackRect => const Rect.fromLTWH(390, 564, 500, 52);
 
-  Rect get _feedbackRect => const Rect.fromLTWH(104, 554, 1072, 58);
-
-  Rect get _retryButton => const Rect.fromLTWH(490, 484, 300, 64);
+  Rect get _retryButton => const Rect.fromLTWH(490, 440, 300, 64);
 
   List<double> get _laneYs => <double>[
-    _staffRect.top + 214,
-    _staffRect.top + 186,
-    _staffRect.top + 158,
-    _staffRect.top + 130,
-    _staffRect.top + 102,
-    _staffRect.top + 74,
-    _staffRect.top + 46,
+    _staffRect.top + 340, // lane 0 – C
+    _staffRect.top + 280, // lane 1 – D
+    _staffRect.top + 210, // lane 2 – E
+    _staffRect.top + 175, // lane 3 – F
+    _staffRect.top + 130, // lane 4 – G
+    _staffRect.top + 65, // lane 5 – A
   ];
 
   @override
@@ -149,8 +123,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
 
       if (_songTime - note.time > _hitWindow) {
         note.missed = true;
-        _combo = 0;
-        _misses += 1;
+        MinigameSfx.playError();
         _setJudgement('Miss', const Color(0xFFD94B57));
       }
     }
@@ -173,7 +146,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
     _renderNotes(canvas);
     _renderFeedback(canvas);
 
-    if (_roundEnded) {
+    if (_roundEnded && !_won) {
       _renderResultCard(canvas);
     }
   }
@@ -203,11 +176,10 @@ class MusicRhythmMinigameComponent extends PositionComponent
     final delta = (_songTime - note.time).abs();
     note.hit = true;
     _cleanHits += 1;
-    _combo += 1;
-    _bestCombo = math.max(_bestCombo, _combo);
+
+    MinigameSfx.playNote(note.noteName);
 
     if (delta <= _perfectWindow) {
-      _perfectHits += 1;
       _setJudgement('Perfect', const Color(0xFFFFC84A));
     } else {
       _setJudgement('Good', const Color(0xFF7FD1FF));
@@ -221,10 +193,6 @@ class MusicRhythmMinigameComponent extends PositionComponent
     _judgementTimer = 1.2;
     _victoryDelay = 0;
     _cleanHits = 0;
-    _perfectHits = 0;
-    _misses = 0;
-    _combo = 0;
-    _bestCombo = 0;
     _won = false;
     _roundEnded = false;
     _finishTriggered = false;
@@ -235,26 +203,57 @@ class MusicRhythmMinigameComponent extends PositionComponent
       ..addAll(_buildChart());
   }
 
+  /// Twinkle Twinkle Little Star (full)
   List<_RhythmNote> _buildChart() {
     return <_RhythmNote>[
-      _RhythmNote(time: 1.2, lane: 4),
-      _RhythmNote(time: 1.7, lane: 5),
-      _RhythmNote(time: 2.2, lane: 3),
-      _RhythmNote(time: 2.8, lane: 2, accent: true),
-      _RhythmNote(time: 3.4, lane: 4),
-      _RhythmNote(time: 4.1, lane: 1),
-      _RhythmNote(time: 4.8, lane: 2),
-      _RhythmNote(time: 5.3, lane: 4, accent: true),
-      _RhythmNote(time: 6.0, lane: 5),
-      _RhythmNote(time: 6.6, lane: 3),
-      _RhythmNote(time: 7.2, lane: 2),
-      _RhythmNote(time: 8.0, lane: 0, accent: true),
-      _RhythmNote(time: 8.7, lane: 2),
-      _RhythmNote(time: 9.4, lane: 3),
-      _RhythmNote(time: 10.1, lane: 5),
-      _RhythmNote(time: 10.8, lane: 6, accent: true),
-      _RhythmNote(time: 11.4, lane: 4),
-      _RhythmNote(time: 12.1, lane: 2),
+      // Line 1: C C G G A A G –
+      _RhythmNote(time: 1.0, lane: 0, noteName: 'c'),
+      _RhythmNote(time: 1.5, lane: 0, noteName: 'c'),
+      _RhythmNote(time: 2.0, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 2.5, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 3.0, lane: 5, noteName: 'a'),
+      _RhythmNote(time: 3.5, lane: 5, noteName: 'a'),
+      _RhythmNote(time: 4.0, lane: 4, noteName: 'g', accent: true),
+      // Line 2: F F E E D D C –
+      _RhythmNote(time: 5.0, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 5.5, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 6.0, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 6.5, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 7.0, lane: 1, noteName: 'd'),
+      _RhythmNote(time: 7.5, lane: 1, noteName: 'd'),
+      _RhythmNote(time: 8.0, lane: 0, noteName: 'c', accent: true),
+      // Line 3: G G F F E E D –
+      _RhythmNote(time: 9.0, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 9.5, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 10.0, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 10.5, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 11.0, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 11.5, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 12.0, lane: 1, noteName: 'd', accent: true),
+      // Line 4: G G F F E E D –
+      _RhythmNote(time: 13.0, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 13.5, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 14.0, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 14.5, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 15.0, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 15.5, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 16.0, lane: 1, noteName: 'd', accent: true),
+      // Line 5 (repeat line 1): C C G G A A G –
+      _RhythmNote(time: 17.0, lane: 0, noteName: 'c'),
+      _RhythmNote(time: 17.5, lane: 0, noteName: 'c'),
+      _RhythmNote(time: 18.0, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 18.5, lane: 4, noteName: 'g'),
+      _RhythmNote(time: 19.0, lane: 5, noteName: 'a'),
+      _RhythmNote(time: 19.5, lane: 5, noteName: 'a'),
+      _RhythmNote(time: 20.0, lane: 4, noteName: 'g', accent: true),
+      // Line 6 (repeat line 2): F F E E D D C –
+      _RhythmNote(time: 21.0, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 21.5, lane: 3, noteName: 'f'),
+      _RhythmNote(time: 22.0, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 22.5, lane: 2, noteName: 'e'),
+      _RhythmNote(time: 23.0, lane: 1, noteName: 'd'),
+      _RhythmNote(time: 23.5, lane: 1, noteName: 'd'),
+      _RhythmNote(time: 24.0, lane: 0, noteName: 'c', accent: true),
     ];
   }
 
@@ -273,7 +272,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
       }
 
       final noteOffset = Offset(_noteX(note), _laneYs[note.lane]);
-      if ((tap - noteOffset).distance > 44) {
+      if ((tap - noteOffset).distance > 56) {
         continue;
       }
 
@@ -300,7 +299,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
     _roundEnded = true;
     _won = _cleanHits >= minimumCleanHits;
     if (_won) {
-      _victoryDelay = 1.2;
+      _victoryDelay = 0.35;
       MinigameSfx.playWin();
     }
   }
@@ -378,7 +377,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
         sheetRect.left + 20,
         sheetRect.top - 2,
         sheetRect.width - 40,
-        sheetRect.height + 26,
+        sheetRect.height,
       ),
       image: game.images.fromCache('props/partitura.png'),
       fit: BoxFit.fill,
@@ -387,25 +386,15 @@ class MusicRhythmMinigameComponent extends PositionComponent
     canvas.restore();
 
     final hitLineRect = Rect.fromLTWH(
-      _hitLineX - 8,
+      _hitLineX - 12,
       _staffRect.top - 16,
-      16,
+      24,
       _staffRect.height + 32,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(hitLineRect, const Radius.circular(999)),
       Paint()..color = const Color(0xFFFFE190).withValues(alpha: pulse),
     );
-
-    for (final barX in <double>[430, 590, 750, 910, 1070]) {
-      canvas.drawLine(
-        Offset(barX, _staffRect.top + 18),
-        Offset(barX, _staffRect.bottom - 18),
-        Paint()
-          ..color = const Color(0xFFA98C68).withValues(alpha: 0.18)
-          ..strokeWidth = 2.2,
-      );
-    }
   }
 
   void _renderNotes(Canvas canvas) {
@@ -434,8 +423,8 @@ class MusicRhythmMinigameComponent extends PositionComponent
     canvas.rotate(-0.22);
     final headRect = Rect.fromCenter(
       center: Offset.zero,
-      width: 34,
-      height: 24,
+      width: 48,
+      height: 34,
     );
     canvas.drawOval(headRect, Paint()..color = noteColor);
     canvas.drawOval(
@@ -443,71 +432,52 @@ class MusicRhythmMinigameComponent extends PositionComponent
       Paint()
         ..color = Colors.black.withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.2,
+        ..strokeWidth = 2.8,
     );
     canvas.restore();
 
     canvas.drawLine(
-      Offset(center.dx + 12, center.dy - 4),
-      Offset(center.dx + 12, center.dy - 68),
+      Offset(center.dx + 16, center.dy - 6),
+      Offset(center.dx + 16, center.dy - 88),
       Paint()
         ..color = noteColor
-        ..strokeWidth = 4
+        ..strokeWidth = 5
         ..strokeCap = StrokeCap.round,
     );
     canvas.drawCircle(
       Offset(center.dx - 2, center.dy - 2),
-      6,
+      8,
       Paint()..color = Colors.white.withValues(alpha: 0.25),
     );
   }
 
   void _renderHud(Canvas canvas) {
-    final infoCard = RRect.fromRectAndRadius(
-      _infoCardRect,
-      const Radius.circular(24),
+    final hudRRect = RRect.fromRectAndRadius(
+      _hudRect,
+      const Radius.circular(18),
     );
     canvas.drawRRect(
-      infoCard,
+      hudRRect,
       Paint()..color = Colors.white.withValues(alpha: 0.74),
     );
     canvas.drawRRect(
-      infoCard,
+      hudRRect,
       Paint()
         ..color = const Color(0xFFE7D5B7)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
-    _titleText.render(canvas, 'MOZART CONSEQUENCES', Vector2(128, 120));
-    _bodyText.render(
+
+    _hudText.render(
       canvas,
-      'Suit will not hear a word while Mozart plays.\nTap when a note reaches the gold line.',
-      Vector2(128, 158),
+      'Tap the note when they cross the yellow line',
+      Vector2(_hudRect.left + 18, _hudRect.top + 17),
     );
 
-    final statsCard = RRect.fromRectAndRadius(
-      _statsCardRect,
-      const Radius.circular(24),
-    );
-    canvas.drawRRect(
-      statsCard,
-      Paint()..color = Colors.white.withValues(alpha: 0.74),
-    );
-    canvas.drawRRect(
-      statsCard,
-      Paint()
-        ..color = const Color(0xFFE7D5B7)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-
+    // Progress bar on the right side.
+    final barLeft = _hudRect.right - 250;
     final meterRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        _statsCardRect.left + 22,
-        _statsCardRect.top + 18,
-        _statsCardRect.width - 44,
-        22,
-      ),
+      Rect.fromLTWH(barLeft, _hudRect.top + 14, 160, 18),
       const Radius.circular(999),
     );
     final progress = (_cleanHits / minimumCleanHits).clamp(0.0, 1.0);
@@ -517,40 +487,20 @@ class MusicRhythmMinigameComponent extends PositionComponent
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          _statsCardRect.left + 22,
-          _statsCardRect.top + 18,
-          (_statsCardRect.width - 44) * progress,
-          22,
-        ),
+        Rect.fromLTWH(barLeft, _hudRect.top + 14, 160 * progress, 18),
         const Radius.circular(999),
       ),
       Paint()..color = const Color(0xFFD4A347),
     );
     _scoreText.render(
       canvas,
-      'CLEAN HITS $_cleanHits/$minimumCleanHits',
-      Vector2(_statsCardRect.left + 22, _statsCardRect.top + 56),
-    );
-    _scoreText.render(
-      canvas,
-      'PERFECT $_perfectHits',
-      Vector2(_statsCardRect.left + 22, _statsCardRect.top + 82),
-    );
-    _scoreText.render(
-      canvas,
-      'COMBO $_combo',
-      Vector2(_statsCardRect.left + 230, _statsCardRect.top + 56),
-    );
-    _scoreText.render(
-      canvas,
-      'MISSES $_misses',
-      Vector2(_statsCardRect.left + 230, _statsCardRect.top + 82),
+      '$_cleanHits/$minimumCleanHits',
+      Vector2(barLeft + 175, _hudRect.top + 14),
     );
   }
 
   void _renderFeedback(Canvas canvas) {
-    final feedbackRect = RRect.fromRectAndRadius(
+    final feedbackRRect = RRect.fromRectAndRadius(
       _feedbackRect,
       const Radius.circular(18),
     );
@@ -561,65 +511,82 @@ class MusicRhythmMinigameComponent extends PositionComponent
         ? _judgementColor
         : const Color(0xFF274A45);
     final text = _countIn > 0
-        ? 'Silence... ${(_countIn * 3).ceil().clamp(1, 3)}'
+        ? 'Get ready... ${(_countIn * 3).ceil().clamp(1, 3)}'
         : isActive
         ? _judgement
-        : 'Tap when a note reaches the gold line.';
+        : '';
 
     canvas.drawRRect(
-      feedbackRect,
+      feedbackRRect,
       Paint()..color = fillColor.withValues(alpha: 0.94),
     );
     canvas.drawRRect(
-      feedbackRect,
+      feedbackRRect,
       Paint()
         ..color = Colors.white.withValues(alpha: 0.16)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
-    _feedbackText.render(
+
+    final painter = TextPainter(
+      text: TextSpan(text: text.toUpperCase(), style: _feedbackStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(
       canvas,
-      text.toUpperCase(),
-      Vector2(_feedbackRect.left + 28, _feedbackRect.top + 15),
+      Offset(
+        _feedbackRect.left + (_feedbackRect.width - painter.width) / 2,
+        _feedbackRect.top + (_feedbackRect.height - painter.height) / 2,
+      ),
     );
   }
 
   void _renderResultCard(Canvas canvas) {
-    final cardRect = RRect.fromRectAndRadius(
-      const Rect.fromLTWH(372, 204, 536, 324),
+    _renderFailCard(canvas);
+  }
+
+  void _renderFailCard(Canvas canvas) {
+    const cardBounds = Rect.fromLTWH(410, 230, 460, 290);
+    final cardRRect = RRect.fromRectAndRadius(
+      cardBounds,
       const Radius.circular(34),
     );
 
     canvas.drawRRect(
-      cardRect,
+      cardRRect,
       Paint()..color = const Color(0xFFFFF7EC).withValues(alpha: 0.98),
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        const Rect.fromLTWH(384, 216, 512, 300),
+        cardBounds.deflate(12),
         const Radius.circular(26),
       ),
       Paint()..color = Colors.white.withValues(alpha: 0.12),
     );
     canvas.drawRRect(
-      cardRect,
+      cardRRect,
       Paint()
-        ..color = _won ? const Color(0xFF274A45) : const Color(0xFF8D5B2E)
+        ..color = const Color(0xFF8D5B2E)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4,
     );
 
-    _resultTitleText.render(
-      canvas,
-      _won ? 'FIRST MOVEMENT OVER' : 'SUIT STILL SHOUTS',
-      Vector2(_won ? 430 : 446, 246),
-    );
     _drawWrappedText(
       canvas,
-      _won
-          ? 'Suit finally pauses Mozart.\nBig gets a few seconds to explain the Brodaflix mess.'
-          : 'Need at least $minimumCleanHits clean hits before the first movement ends.\nStay on the gold line and play it again.',
-      const Rect.fromLTWH(420, 310, 440, 92),
+      'FAILED',
+      const Rect.fromLTWH(410, 260, 460, 56),
+      GoogleFonts.sniglet(
+        color: const Color(0xFFD94B57),
+        fontSize: 46,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 3,
+      ),
+    );
+
+    _drawWrappedText(
+      canvas,
+      "Big bro won't let you talk until the music is over",
+      const Rect.fromLTWH(440, 330, 400, 50),
       GoogleFonts.sniglet(
         color: const Color(0xFF5D4C38),
         fontSize: 22,
@@ -628,31 +595,29 @@ class MusicRhythmMinigameComponent extends PositionComponent
       ),
     );
 
-    if (!_won) {
-      final retryRRect = RRect.fromRectAndRadius(
-        _retryButton,
-        const Radius.circular(18),
-      );
-      canvas.drawRRect(retryRRect, Paint()..color = const Color(0xFF274A45));
-      canvas.drawRRect(
-        retryRRect,
-        Paint()
-          ..color = const Color(0xFFD4A347)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3,
-      );
-      _drawWrappedText(
-        canvas,
-        'PLAY IT AGAIN',
-        _retryButton,
-        GoogleFonts.sniglet(
-          color: Colors.white,
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.8,
-        ),
-      );
-    }
+    final retryRRect = RRect.fromRectAndRadius(
+      _retryButton,
+      const Radius.circular(18),
+    );
+    canvas.drawRRect(retryRRect, Paint()..color = const Color(0xFF274A45));
+    canvas.drawRRect(
+      retryRRect,
+      Paint()
+        ..color = const Color(0xFFD4A347)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+    _drawWrappedText(
+      canvas,
+      'RETRY',
+      _retryButton,
+      GoogleFonts.sniglet(
+        color: Colors.white,
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.8,
+      ),
+    );
   }
 
   void _drawWrappedText(
@@ -670,7 +635,7 @@ class MusicRhythmMinigameComponent extends PositionComponent
     )..layout(maxWidth: rect.width);
 
     final offset = Offset(
-      rect.left,
+      rect.left + ((rect.width - painter.width) / 2),
       rect.top + ((rect.height - painter.height) / 2),
     );
     painter.paint(canvas, offset);
@@ -678,10 +643,16 @@ class MusicRhythmMinigameComponent extends PositionComponent
 }
 
 class _RhythmNote {
-  _RhythmNote({required this.time, required this.lane, this.accent = false});
+  _RhythmNote({
+    required this.time,
+    required this.lane,
+    required this.noteName,
+    this.accent = false,
+  });
 
   final double time;
   final int lane;
+  final String noteName;
   final bool accent;
   bool hit = false;
   bool missed = false;

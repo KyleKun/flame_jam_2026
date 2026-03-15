@@ -1,11 +1,28 @@
+import 'package:flame_jam_2026/game/audio/game_bgm.dart';
+import 'package:flame_jam_2026/game/audio/minigame_sfx.dart';
 import 'package:flame_jam_2026/game/my_game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MinigameGameOverOverlay extends StatelessWidget {
+class MinigameGameOverOverlay extends StatefulWidget {
   const MinigameGameOverOverlay({super.key, required this.game});
 
   final MyGame game;
+
+  @override
+  State<MinigameGameOverOverlay> createState() =>
+      _MinigameGameOverOverlayState();
+}
+
+class _MinigameGameOverOverlayState extends State<MinigameGameOverOverlay> {
+  @override
+  void initState() {
+    super.initState();
+    GameBgm.pause();
+    MinigameSfx.playFail();
+  }
+
+  MyGame get game => widget.game;
 
   @override
   Widget build(BuildContext context) {

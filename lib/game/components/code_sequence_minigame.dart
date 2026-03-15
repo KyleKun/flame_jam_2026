@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame_jam_2026/game/audio/minigame_sfx.dart';
@@ -95,23 +97,6 @@ class CodeSequenceMinigameComponent extends PositionComponent
     fontWeight: FontWeight.w700,
   );
 
-  final TextPaint _titlePaint = TextPaint(
-    style: GoogleFonts.spaceMono(
-      color: const Color(0xFF7BD49E),
-      fontSize: 17,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1.6,
-    ),
-  );
-
-  final TextPaint _objectivePaint = TextPaint(
-    style: GoogleFonts.spaceMono(
-      color: const Color(0xFFE7FFF0),
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-    ),
-  );
-
   final TextPaint _labelPaint = TextPaint(
     style: GoogleFonts.spaceMono(
       color: const Color(0xFF5A9E76),
@@ -138,14 +123,6 @@ class CodeSequenceMinigameComponent extends PositionComponent
     ),
   );
 
-  final TextPaint _buttonPaint = TextPaint(
-    style: GoogleFonts.spaceMono(
-      color: const Color(0xFFFFF6F2),
-      fontSize: 15,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1.2,
-    ),
-  );
 
   final TextPaint _victoryTitlePaint = TextPaint(
     style: GoogleFonts.spaceMono(
@@ -156,18 +133,10 @@ class CodeSequenceMinigameComponent extends PositionComponent
     ),
   );
 
-  final TextPaint _victoryBodyPaint = TextPaint(
-    style: GoogleFonts.spaceMono(
-      color: const Color(0xFFA6E7BC),
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      height: 1.18,
-    ),
-  );
-
   // ── State ──
 
   final List<int> _selectedIndices = <int>[];
+  List<int> _bankOrder = <int>[];
   int _roundIndex = 0;
   int _mistakes = 0;
   double _statusTimer = 0;
@@ -183,9 +152,9 @@ class CodeSequenceMinigameComponent extends PositionComponent
   // ── Layout ──
 
   // Terminal.png frame (the window chrome)
-  Rect get _frameRect => const Rect.fromLTWH(90, 30, 1100, 650);
+  Rect get _frameRect => const Rect.fromLTWH(90, -20, 1100, 740);
 
-  // The screen area below the terminal title bar (opaque black content area)
+  // Content area below the terminal title bar
   Rect get _screenRect => Rect.fromLTWH(
     _frameRect.left + 4,
     _frameRect.top + 100,
@@ -193,26 +162,18 @@ class CodeSequenceMinigameComponent extends PositionComponent
     _frameRect.height - 106,
   );
 
-  // Command line panel
-  Rect get _commandRect => Rect.fromLTWH(
-    _screenRect.left + 16,
-    _screenRect.top + 90,
-    _screenRect.width - 32,
-    90,
-  );
-
-  // Area where command tokens are laid out
+  // Command tokens area – inline with "hackerbro>" prompt (no panel)
   Rect get _commandTokenArea => Rect.fromLTWH(
-    _commandRect.left + 16,
-    _commandRect.top + 16,
-    _commandRect.width - 32,
-    _commandRect.height - 32,
+    _frameRect.left + 540,
+    _frameRect.top + 270,
+    _screenRect.right - (_frameRect.left + 540) - 16,
+    50,
   );
 
   // Bank panel
   Rect get _bankRect => Rect.fromLTWH(
     _screenRect.left + 16,
-    _commandRect.bottom + 30,
+    _frameRect.top + 350,
     _screenRect.width - 32,
     186,
   );
@@ -225,21 +186,21 @@ class CodeSequenceMinigameComponent extends PositionComponent
     _bankRect.height - 32,
   );
 
-  Rect get _resetButton => Rect.fromLTWH(
-    _screenRect.right - 148,
-    _bankRect.bottom + 14,
-    130,
-    38,
-  );
-
   Rect get _statusRect => Rect.fromLTWH(
     _screenRect.left + 16,
     _bankRect.bottom + 16,
-    _screenRect.width - 180,
+    _screenRect.width - 32,
     34,
   );
 
   _CodeRound get _currentRound => _rounds[_roundIndex];
+
+  // ── Lifecycle ──
+
+  @override
+  Future<void> onLoad() async {
+    _shuffleBank();
+  }
 
   // ── Update ──
 
@@ -291,25 +252,18 @@ class CodeSequenceMinigameComponent extends PositionComponent
       filterQuality: FilterQuality.high,
     );
 
-    // 3. Opaque black screen area (covers the prompt text in terminal.png)
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(_screenRect, const Radius.circular(4)),
-      Paint()..color = const Color(0xFF0A0A0A),
-    );
-
-    // 4. Subtle CRT scanlines
+    // 3. Subtle CRT scanlines over terminal
     canvas.save();
-    canvas.clipRect(_screenRect);
-    for (var y = _screenRect.top; y < _screenRect.bottom; y += 3) {
+    canvas.clipRect(_frameRect);
+    for (var y = _frameRect.top; y < _frameRect.bottom; y += 3) {
       canvas.drawLine(
-        Offset(_screenRect.left, y),
-        Offset(_screenRect.right, y),
-        Paint()..color = const Color(0xFF1A3020).withValues(alpha: 0.12),
+        Offset(_frameRect.left, y),
+        Offset(_frameRect.right, y),
+        Paint()..color = const Color(0xFF1A3020).withValues(alpha: 0.06),
       );
     }
     canvas.restore();
 
-    _renderHeader(canvas);
     _renderCommand(canvas);
     _renderBank(canvas);
     _renderFooter(canvas);
@@ -319,71 +273,8 @@ class CodeSequenceMinigameComponent extends PositionComponent
     }
   }
 
-  void _renderHeader(Canvas canvas) {
-    // Title
-    _titlePaint.render(
-      canvas,
-      'BRODAFLIX REMOTE OPS',
-      Vector2(_screenRect.left + 20, _screenRect.top + 14),
-    );
-
-    // Objective
-    _objectivePaint.render(
-      canvas,
-      '// ${_currentRound.objective}',
-      Vector2(_screenRect.left + 20, _screenRect.top + 40),
-    );
-
-    // STEP badge
-    _drawBadge(
-      canvas,
-      rect: Rect.fromLTWH(
-        _screenRect.right - 250,
-        _screenRect.top + 14,
-        112,
-        30,
-      ),
-      label: 'STEP ${_roundIndex + 1}/${_rounds.length}',
-      color: const Color(0xFF143D2A),
-    );
-
-    // ERR badge
-    _drawBadge(
-      canvas,
-      rect: Rect.fromLTWH(
-        _screenRect.right - 128,
-        _screenRect.top + 14,
-        108,
-        30,
-      ),
-      label: 'ERR $_mistakes',
-      color: _mistakes > 0
-          ? const Color(0xFF6B2E28)
-          : const Color(0xFF3A2420),
-    );
-  }
-
   void _renderCommand(Canvas canvas) {
-    // Section label
-    _labelPaint.render(
-      canvas,
-      'COMMAND:',
-      Vector2(_commandRect.left + 4, _commandRect.top - 18),
-    );
-
-    // Panel
-    final rRect =
-        RRect.fromRectAndRadius(_commandRect, const Radius.circular(10));
-    canvas.drawRRect(rRect, Paint()..color = const Color(0xFF111E16));
-    canvas.drawRRect(
-      rRect,
-      Paint()
-        ..color = const Color(0xFF3CDA73).withValues(alpha: 0.2)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
-
-    // Placed tokens
+    // Placed tokens (inline with hackerbro> prompt)
     for (final layout in _selectedLayouts()) {
       _drawTokenChip(
         canvas,
@@ -403,7 +294,7 @@ class CodeSequenceMinigameComponent extends PositionComponent
     ) {
       final rect = _placeholderRectFor(i);
       final isNext = i == _selectedIndices.length;
-      _drawSlot(canvas, rect, isNext: isNext);
+      _drawSlot(canvas, rect, isNext: isNext, slotIndex: i);
     }
   }
 
@@ -415,12 +306,14 @@ class CodeSequenceMinigameComponent extends PositionComponent
       Vector2(_bankRect.left + 4, _bankRect.top - 18),
     );
 
-    // Panel
-    final rRect =
-        RRect.fromRectAndRadius(_bankRect, const Radius.circular(10));
-    canvas.drawRRect(rRect, Paint()..color = const Color(0xFF0E1A13));
+    // Panel (semi-transparent)
+    final rRect = RRect.fromRectAndRadius(_bankRect, const Radius.circular(10));
+    canvas.drawRRect(
+      rRect,
+      Paint()..color = const Color(0xFF0E1A13).withValues(alpha: 0.82),
+    );
 
-    // Tokens
+    // Tokens (in shuffled order)
     for (final layout in _bankLayouts()) {
       if (layout.available) {
         _drawTokenChip(
@@ -457,35 +350,47 @@ class CodeSequenceMinigameComponent extends PositionComponent
       Vector2(_statusRect.left + 12, _statusRect.top + 7),
     );
 
-    // Reset button
-    final resetColor = _selectedIndices.isEmpty
-        ? const Color(0xFF3A2420)
-        : const Color(0xFF7E352F);
-    final resetRRect =
-        RRect.fromRectAndRadius(_resetButton, const Radius.circular(10));
-    canvas.drawRRect(resetRRect, Paint()..color = resetColor);
-    _buttonPaint.render(
+    // STEP badge (below status)
+    _drawBadge(
       canvas,
-      'RESET',
-      Vector2(_resetButton.left + 30, _resetButton.top + 8),
+      rect: Rect.fromLTWH(
+        _statusRect.left,
+        _statusRect.bottom + 12,
+        112,
+        30,
+      ),
+      label: 'STEP ${_roundIndex + 1}/${_rounds.length}',
+      color: const Color(0xFF143D2A),
+    );
+
+    // ERR badge (next to STEP)
+    _drawBadge(
+      canvas,
+      rect: Rect.fromLTWH(
+        _statusRect.left + 124,
+        _statusRect.bottom + 12,
+        108,
+        30,
+      ),
+      label: 'ERR $_mistakes',
+      color: _mistakes > 0 ? const Color(0xFF6B2E28) : const Color(0xFF3A2420),
     );
   }
 
   void _renderVictory(Canvas canvas) {
-    // Dim the screen
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(_screenRect, const Radius.circular(4)),
+    // Dim the terminal area
+    canvas.drawRect(
+      _frameRect,
       Paint()..color = const Color(0xFF0A0A0A).withValues(alpha: 0.88),
     );
 
     // Victory panel
     final panelRect = Rect.fromCenter(
-      center: _screenRect.center,
-      width: 620,
-      height: 180,
+      center: _frameRect.center,
+      width: 480,
+      height: 80,
     );
-    final rRect =
-        RRect.fromRectAndRadius(panelRect, const Radius.circular(16));
+    final rRect = RRect.fromRectAndRadius(panelRect, const Radius.circular(16));
     canvas.drawRRect(rRect, Paint()..color = const Color(0xFF0D2A1C));
     canvas.drawRRect(
       rRect,
@@ -498,12 +403,10 @@ class CodeSequenceMinigameComponent extends PositionComponent
     _victoryTitlePaint.render(
       canvas,
       'DIAGNOSTIC COMPLETE',
-      Vector2(panelRect.left + 38, panelRect.top + 30),
-    );
-    _victoryBodyPaint.render(
-      canvas,
-      'No server fault found.\nBlue is about to report the bad news.',
-      Vector2(panelRect.left + 38, panelRect.top + 80),
+      Vector2(
+        panelRect.left + (panelRect.width - 380) / 2,
+        panelRect.top + (panelRect.height - 28) / 2,
+      ),
     );
   }
 
@@ -523,13 +426,6 @@ class CodeSequenceMinigameComponent extends PositionComponent
         _setStatus('Rewound to that block.', const Color(0xFF216F93));
         return;
       }
-    }
-
-    // Reset button
-    if (_resetButton.contains(tap) && _selectedIndices.isNotEmpty) {
-      _selectedIndices.clear();
-      _setStatus('Line cleared.', const Color(0xFF216F93));
-      return;
     }
 
     // Bank tokens
@@ -573,14 +469,20 @@ class CodeSequenceMinigameComponent extends PositionComponent
   void _advanceRound() {
     if (_roundIndex == _rounds.length - 1) {
       _won = true;
-      _victoryDelay = 1.2;
+      _victoryDelay = 2.7;
       MinigameSfx.playWin();
       return;
     }
 
     _roundIndex += 1;
     _selectedIndices.clear();
+    _shuffleBank();
     _setStatus('Next command.', const Color(0xFF1F8B54));
+  }
+
+  void _shuffleBank() {
+    _bankOrder = List<int>.generate(_currentRound.bank.length, (i) => i)
+      ..shuffle(Random());
   }
 
   void _setStatus(String text, Color color) {
@@ -622,7 +524,7 @@ class CodeSequenceMinigameComponent extends PositionComponent
     _drawTokenLabel(canvas, rect, label, color: textColor);
   }
 
-  void _drawSlot(Canvas canvas, Rect rect, {required bool isNext}) {
+  void _drawSlot(Canvas canvas, Rect rect, {required bool isNext, required int slotIndex}) {
     final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(12));
     final borderColor = isNext
         ? const Color(0xFF3CDA73).withValues(alpha: 0.55)
@@ -637,10 +539,8 @@ class CodeSequenceMinigameComponent extends PositionComponent
     _drawTokenLabel(
       canvas,
       rect,
-      '___',
-      color: isNext
-          ? const Color(0xFF7FD8A2)
-          : const Color(0xFF3D6B50),
+      '${slotIndex + 1}',
+      color: isNext ? const Color(0xFF7FD8A2) : const Color(0xFF3D6B50),
     );
   }
 
@@ -651,7 +551,10 @@ class CodeSequenceMinigameComponent extends PositionComponent
     Color color = const Color(0xFFE6FFF0),
   }) {
     final painter = TextPainter(
-      text: TextSpan(text: label, style: _tokenStyle.copyWith(color: color)),
+      text: TextSpan(
+        text: label,
+        style: _tokenStyle.copyWith(color: color),
+      ),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: rect.width - 16);
 
@@ -667,14 +570,37 @@ class CodeSequenceMinigameComponent extends PositionComponent
   // ── Layout helpers ──
 
   List<_TokenLayout> _bankLayouts() {
-    return _layoutTokens(
-      labels: _currentRound.bank,
-      area: _bankTokenArea,
-      availability: List<bool>.generate(
-        _currentRound.bank.length,
-        (index) => !_selectedIndices.contains(index),
-      ),
-    );
+    var x = _bankTokenArea.left;
+    var y = _bankTokenArea.top;
+    var rowHeight = 0.0;
+    final layouts = <_TokenLayout>[];
+
+    for (var di = 0; di < _bankOrder.length; di++) {
+      final originalIndex = _bankOrder[di];
+      final label = _currentRound.bank[originalIndex];
+      final labelSize = _measureLabel(label);
+      final chipWidth = labelSize.width + 28;
+
+      if (x + chipWidth > _bankTokenArea.right && di > 0) {
+        x = _bankTokenArea.left;
+        y += rowHeight + 12;
+        rowHeight = 0;
+      }
+
+      final rect = Rect.fromLTWH(x, y, chipWidth, 46);
+      layouts.add(
+        _TokenLayout(
+          bankIndex: originalIndex,
+          label: label,
+          rect: rect,
+          available: !_selectedIndices.contains(originalIndex),
+        ),
+      );
+      x = rect.right + 12;
+      if (rect.height > rowHeight) rowHeight = rect.height;
+    }
+
+    return layouts;
   }
 
   List<_SelectedTokenLayout> _selectedLayouts() {
@@ -690,42 +616,6 @@ class CodeSequenceMinigameComponent extends PositionComponent
       _commandTokenArea,
     );
     return layouts[slotIndex].rect;
-  }
-
-  List<_TokenLayout> _layoutTokens({
-    required List<String> labels,
-    required Rect area,
-    required List<bool> availability,
-  }) {
-    var x = area.left;
-    var y = area.top;
-    var rowHeight = 0.0;
-    final layouts = <_TokenLayout>[];
-
-    for (var i = 0; i < labels.length; i++) {
-      final labelSize = _measureLabel(labels[i]);
-      final chipWidth = labelSize.width + 28;
-
-      if (x + chipWidth > area.right && i > 0) {
-        x = area.left;
-        y += rowHeight + 12;
-        rowHeight = 0;
-      }
-
-      final rect = Rect.fromLTWH(x, y, chipWidth, 46);
-      layouts.add(
-        _TokenLayout(
-          bankIndex: i,
-          label: labels[i],
-          rect: rect,
-          available: availability[i],
-        ),
-      );
-      x = rect.right + 12;
-      if (rect.height > rowHeight) rowHeight = rect.height;
-    }
-
-    return layouts;
   }
 
   List<_SelectedTokenLayout> _layoutSelectedTokens(

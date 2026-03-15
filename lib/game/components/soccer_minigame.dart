@@ -555,9 +555,11 @@ class SoccerMinigameComponent extends PositionComponent
           : (_ballTarget.x - _goalie.position.x).sign;
       _playSaveAnimation(saveSide: saveSide);
       _setCallout('SAVE!', 1.0, tone: _CalloutTone.save);
+      MinigameSfx.playError();
     } else {
       _goals++;
       _triggerGoalFeedbackBurst();
+      MinigameSfx.playGoal();
       _playGoalAnimation(
         cornerFactor: cornerFactor,
         heightFactor: heightFactor,

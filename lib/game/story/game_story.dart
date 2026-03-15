@@ -661,8 +661,13 @@ class GameStory {
           speaker: StoryActorId.suit,
           side: StoryDialogueSide.right,
           portraitOffsetY: -18,
-          text:
-              "Now that the first movement is over, you've got exactly 6.9 seconds to tell me what you need.",
+          text: "Thank you for listening that masterpiece with me.",
+        ),
+        StoryLine(
+          speaker: StoryActorId.suit,
+          side: StoryDialogueSide.right,
+          portraitOffsetY: -18,
+          text: "Now, what do you need?",
         ),
         StoryLine(
           speaker: StoryActorId.big,
@@ -681,14 +686,14 @@ class GameStory {
           side: StoryDialogueSide.right,
           actorImagePath: 'chars/suit2.png',
           portraitOffsetY: -18,
-          text: "Crying? Okay, I will listen to this piece later.",
+          text: "Crying? Oh god...",
         ),
         StoryLine(
           speaker: StoryActorId.suit,
           side: StoryDialogueSide.right,
           actorImagePath: 'chars/suit2.png',
           portraitOffsetY: -18,
-          text: "Tell me, what's going on?",
+          text: "Go ahead, tell me more...",
         ),
         StoryLine(
           speaker: StoryActorId.big,
@@ -712,6 +717,7 @@ class GameStory {
         StoryLine(
           speaker: StoryActorId.suit,
           side: StoryDialogueSide.right,
+          actorImagePath: 'chars/suit2.png',
           portraitOffsetY: -18,
           text:
               "Let me check the subscription status, though I'm sure I paid it a few days ago...",

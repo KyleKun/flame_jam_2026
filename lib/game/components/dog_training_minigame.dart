@@ -54,15 +54,6 @@ class DogTrainingMinigameComponent extends PositionComponent
       _DogCommand.stay,
       _DogCommand.speak,
     ],
-    <_DogCommand>[
-      _DogCommand.fetch,
-      _DogCommand.dead,
-      _DogCommand.speak,
-      _DogCommand.stay,
-      _DogCommand.fetch,
-      _DogCommand.speak,
-      _DogCommand.dead,
-    ],
   ];
 
   final TextPaint _titleText = TextPaint(
@@ -158,7 +149,7 @@ class DogTrainingMinigameComponent extends PositionComponent
     _dog = SpriteComponent(
       sprite: Sprite(game.images.fromCache(_defaultDogAsset)),
       position: Vector2(360, 516),
-      size: Vector2(260, 254),
+      size: Vector2(320, 313),
       anchor: Anchor.bottomCenter,
       priority: 2,
     );
@@ -225,7 +216,7 @@ class DogTrainingMinigameComponent extends PositionComponent
           _phase = _DogPhase.showing;
           _showIndex = 0;
           _playCommand(_currentSequence[_showIndex], demo: true);
-          _phaseTimer = 0.72;
+          _phaseTimer = 1.1;
         }
         break;
       case _DogPhase.showing:
@@ -233,7 +224,7 @@ class DogTrainingMinigameComponent extends PositionComponent
           if (_showIndex < _currentSequence.length - 1) {
             _showIndex += 1;
             _playCommand(_currentSequence[_showIndex], demo: true);
-            _phaseTimer = 0.72;
+            _phaseTimer = 1.1;
           } else {
             _highlightedCommand = null;
             _phase = _DogPhase.playerInput;
@@ -248,7 +239,7 @@ class DogTrainingMinigameComponent extends PositionComponent
         if (_phaseTimer == 0) {
           if (_roundIndex == _rounds.length - 1) {
             _won = true;
-            _victoryDelay = 1.2;
+            _victoryDelay = 2.2;
             MinigameSfx.playWin();
           } else {
             _startRound(_roundIndex + 1);
@@ -315,6 +306,7 @@ class DogTrainingMinigameComponent extends PositionComponent
         _currentAction = null;
         _dogActionTimer = 0;
         _mistakePoseTimer = 0.42;
+        MinigameSfx.playError();
         _setFeedback('Wrong! Repeating...', const Color(0xFFD35A45));
       }
       return;
@@ -333,7 +325,7 @@ class DogTrainingMinigameComponent extends PositionComponent
 
   void _playCommand(_DogCommand command, {required bool demo}) {
     _highlightedCommand = command;
-    _highlightTimer = demo ? 0.58 : 0.34;
+    _highlightTimer = demo ? 0.9 : 0.34;
     _currentAction = command;
     _dogActionDuration = command == _DogCommand.fetch ? 0.5 : 0.42;
     _dogActionTimer = _dogActionDuration;
@@ -501,24 +493,25 @@ class DogTrainingMinigameComponent extends PositionComponent
       final isHighlighted =
           _highlightedCommand == command && _highlightTimer > 0;
 
-      final fill = isHighlighted
-          ? Color.lerp(palette.base, Colors.white, 0.48)!
-          : palette.base;
-      final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
+      final highlightedFill = Color.lerp(palette.base, Colors.white, 0.45)!;
+      final highlightedGlow = Color.lerp(palette.base, Colors.white, 0.6)!;
+      final fill = isHighlighted ? highlightedFill : palette.base;
+      final padRect = isHighlighted ? rect.inflate(8) : rect;
+      final rRect = RRect.fromRectAndRadius(padRect, const Radius.circular(24));
       if (isHighlighted) {
         // Glow behind the highlighted pad.
         canvas.drawRRect(
-          rRect.inflate(6),
+          rRect.inflate(8),
           Paint()
-            ..color = Colors.white.withValues(alpha: 0.45)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+            ..color = highlightedGlow.withValues(alpha: 0.55)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
         );
       }
       canvas.drawRRect(rRect, Paint()..color = fill);
       canvas.drawRRect(
         rRect,
         Paint()
-          ..color = isHighlighted ? Colors.white : palette.stroke
+          ..color = isHighlighted ? highlightedGlow : palette.stroke
           ..style = PaintingStyle.stroke
           ..strokeWidth = isHighlighted ? 5 : 3,
       );
