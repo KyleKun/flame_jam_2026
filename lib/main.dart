@@ -40,14 +40,14 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  //final game = MyGame();
+  final game = MyGame();
   // final game = MyGame(bootToCodeDebug: true);
   // final game = MyGame();
   // final game = MyGame(bootToBathroomDebug: true);
   // final game = MyGame(bootToSoccerDebug: true);
   // final game = MyGame(bootToQuintalDebug: true);
   // final game = MyGame(bootToCodeDebug: true);
-  final game = MyGame(bootToMusicDebug: true);
+  // final game = MyGame(bootToMusicDebug: true);
 
   @override
   void didChangeDependencies() {
